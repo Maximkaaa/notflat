@@ -1,6 +1,6 @@
-use crate::traits::Point;
 use core::marker::PhantomData;
 use num_traits::Float;
+use crate::common::Point;
 
 pub struct Segment<'a, T: Float, P: Point<T>> {
     start: &'a P,

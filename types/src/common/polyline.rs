@@ -49,7 +49,7 @@ impl<'a, T: Float, P: Point<T>> Polyline<'a, T, P, core::slice::Iter<'a, P>> for
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::traits::CartesianPoint2;
+    use crate::cartesian::CartesianPoint2;
     use test_case::test_case;
 
     #[cfg(feature = "no-std")]
