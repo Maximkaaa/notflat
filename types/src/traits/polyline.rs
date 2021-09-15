@@ -6,26 +6,27 @@ use alloc::vec::Vec;
 
 use super::Point;
 use crate::segment::Segments;
+use num_traits::Float;
 
-pub trait Polyline<'a, P: 'a + Point, PIter: Iterator<Item = &'a P>>: Index<usize> {
+pub trait Polyline<'a, T: Float, P: 'a + Point<T>, PIter: Iterator<Item = &'a P>>: Index<usize> {
     fn points_count(&self) -> usize;
     fn points(&'a self) -> PIter;
 
-    fn segments(&'a self) -> Segments<'a, P, PIter> {
+    fn segments(&'a self) -> Segments<'a, T, P, PIter> {
         Segments::new(self.points())
     }
 
-    fn length(&'a self) -> f32 {
-        let mut length = 0.0;
+    fn length(&'a self) -> T {
+        let mut length = T::zero();
         for segment in self.segments() {
-            length += segment.length();
+            length = length + segment.length();
         }
 
         length
     }
 }
 
-impl<'a, P: Point> Polyline<'a, P, core::slice::Iter<'a, P>> for Vec<P> {
+impl<'a, T: Float, P: Point<T>> Polyline<'a, T, P, core::slice::Iter<'a, P>> for Vec<P> {
     fn points_count(&self) -> usize {
         Vec::len(self)
     }
@@ -35,7 +36,7 @@ impl<'a, P: Point> Polyline<'a, P, core::slice::Iter<'a, P>> for Vec<P> {
     }
 }
 
-impl<'a, P: Point> Polyline<'a, P, core::slice::Iter<'a, P>> for [P] {
+impl<'a, T: Float, P: Point<T>> Polyline<'a, T, P, core::slice::Iter<'a, P>> for [P] {
     fn points_count(&self) -> usize {
         Self::len(self)
     }

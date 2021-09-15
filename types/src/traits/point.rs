@@ -1,65 +1,51 @@
-pub trait Point {
-    fn distance_square(&self, other: &Self) -> f32;
-    fn distance(&self, other: &Self) -> f32 {
-        #[cfg(feature = "no-std")]
-            {
-                return libm::sqrtf(self.distance_square(other));
-            }
+use num_traits::Float;
 
-        #[cfg(not(feature = "no-std"))]
-            {
-                self.distance_square(other).sqrt()
-            }
+pub trait Point<T: Float> {
+    fn distance_square(&self, other: &Self) -> T;
+    fn distance(&self, other: &Self) -> T {
+        self.distance_square(other).sqrt()
     }
 }
 
-pub trait CartesianPoint {
-    fn taxicab_distance(&self, other: &Self) -> f32;
+pub trait CartesianPoint<T: Float> {
+    fn taxicab_distance(&self, other: &Self) -> T;
 }
 
-pub trait CartesianPoint2 {
-    fn x(&self) -> f32;
-    fn y(&self) -> f32;
+pub trait CartesianPoint2<T: Float> {
+    fn x(&self) -> T;
+    fn y(&self) -> T;
 }
 
-impl<P: CartesianPoint2> CartesianPoint for P {
-    fn taxicab_distance(&self, other: &Self) -> f32 {
-        #[cfg(feature = "no-std")]
-            {
-                return libm::fabsf(self.x() - other.x()) + libm::fabsf(self.y() - other.y());
-            }
-
-        #[cfg(not(feature = "no-std"))]
-            {
-                (self.x() - other.x()).abs() + (self.y() - other.y()).abs()
-            }
+impl<T: Float, P: CartesianPoint2<T>> CartesianPoint<T> for P {
+    fn taxicab_distance(&self, other: &Self) -> T {
+        (self.x() - other.x()).abs() + (self.y() - other.y()).abs()
     }
 }
 
-impl<P: CartesianPoint2> Point for P {
-    fn distance_square(&self, other: &Self) -> f32 {
+impl<T: Float, P: CartesianPoint2<T>> Point<T> for P {
+    fn distance_square(&self, other: &Self) -> T {
         let dx = self.x() - other.x();
         let dy = self.y() - other.y();
         dx * dx + dy * dy
     }
 }
 
-impl CartesianPoint2 for [f32; 2] {
-    fn x(&self) -> f32 {
+impl<T: Float> CartesianPoint2<T> for [T; 2] {
+    fn x(&self) -> T {
         self[0]
     }
 
-    fn y(&self) -> f32 {
+    fn y(&self) -> T {
         self[1]
     }
 }
 
-impl CartesianPoint2 for (f32, f32) {
-    fn x(&self) -> f32 {
+impl<T: Float> CartesianPoint2<T> for (T, T) {
+    fn x(&self) -> T {
         self.0
     }
 
-    fn y(&self) -> f32 {
+    fn y(&self) -> T {
         self.1
     }
 }
