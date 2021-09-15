@@ -1,6 +1,10 @@
-use std::ops::Index;
+use core::ops::Index;
+use core::slice::Iter;
+
+#[cfg(feature = "no-std")]
+use alloc::vec::Vec;
+
 use super::Point;
-use std::slice::Iter;
 use crate::segment::Segments;
 
 pub trait Polyline<'a, P: 'a + Point, PIter: Iterator<Item = &'a P>>: Index<usize> {
@@ -46,6 +50,9 @@ mod tests {
     use super::*;
     use crate::traits::CartesianPoint2;
     use test_case::test_case;
+
+    #[cfg(feature = "no-std")]
+    use alloc::vec;
 
     #[test_case(2)]
     #[test_case(3)]

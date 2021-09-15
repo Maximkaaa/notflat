@@ -1,7 +1,15 @@
 pub trait Point {
     fn distance_square(&self, other: &Self) -> f32;
     fn distance(&self, other: &Self) -> f32 {
-        self.distance_square(other).sqrt()
+        #[cfg(feature = "no-std")]
+            {
+                return libm::sqrtf(self.distance_square(other));
+            }
+
+        #[cfg(not(feature = "no-std"))]
+            {
+                self.distance_square(other).sqrt()
+            }
     }
 }
 
@@ -16,7 +24,15 @@ pub trait CartesianPoint2 {
 
 impl<P: CartesianPoint2> CartesianPoint for P {
     fn taxicab_distance(&self, other: &Self) -> f32 {
-        (self.x() - other.x()).abs() + (self.y() - other.y()).abs()
+        #[cfg(feature = "no-std")]
+            {
+                return libm::fabsf(self.x() - other.x()) + libm::fabsf(self.y() - other.y());
+            }
+
+        #[cfg(not(feature = "no-std"))]
+            {
+                (self.x() - other.x()).abs() + (self.y() - other.y()).abs()
+            }
     }
 }
 
