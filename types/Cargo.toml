@@ -6,6 +6,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+geographiclib-rs = "0.2"
+lazy_static = "1.4"
 libm = { version = "0.2.1", optional = true }
 num-traits = { version = "0.2", default-features = false }
 
