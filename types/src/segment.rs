@@ -19,19 +19,32 @@ impl<'a, T: Float, P> Segment<'a, T, P> {
     }
 }
 
-impl<'a, T: Float, P: 'a + CartesianPoint2<T>> Segment<'a, T, P> {
+impl<'a, T: Float, P: CartesianPoint2<T>> Segment<'a, T, P> {
     pub fn length(&self) -> T {
         self.start.distance(&self.end)
     }
+
+    pub fn determinant(&self) -> T {
+        self.start.x() * self.end.y() - self.start.y() * self.end.x()
+    }
+
+    pub fn determinant_shifted(&self, dx: T, dy: T) -> T {
+        let x1 = self.start.x() + dx;
+        let y1 = self.start.y() + dy;
+        let x2 = self.end.x() + dx;
+        let y2 = self.end.y() + dy;
+
+        x1 * y2 - x2 * y1
+    }
 }
 
-pub struct Segments<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> {
+pub struct Segments<'a, T: Float, P, PIter: Iterator<Item = &'a P>> {
     prev_point: Option<&'a P>,
     points_iter: PIter,
     phantom: PhantomData<T>,
 }
 
-impl<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> Segments<'a, T, P, PIter> {
+impl<'a, T: Float, P, PIter: Iterator<Item = &'a P>> Segments<'a, T, P, PIter> {
     pub fn new(mut points_iter: PIter) -> Self {
         let first_point = points_iter.next();
         Self {
@@ -42,7 +55,7 @@ impl<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> Segments<'a, T, P, PIte
     }
 }
 
-impl<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> Iterator for Segments<'a, T, P, PIter> {
+impl<'a, T: Float, P, PIter: Iterator<Item = &'a P>> Iterator for Segments<'a, T, P, PIter> {
     type Item = Segment<'a, T, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
