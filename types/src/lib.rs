@@ -9,3 +9,4 @@ pub mod cartesian;
 pub mod geo;
 pub mod datum;
 pub mod projection;
+pub mod error;

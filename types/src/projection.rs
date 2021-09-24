@@ -4,19 +4,15 @@ use core::iter::FromIterator;
 use crate::cartesian::CartesianPoint2;
 use crate::geo::GeoPoint;
 
-#[cfg(feature = "no-std")]
-use alloc::format;
-#[cfg(feature = "no-std")]
-use alloc::string::String;
-
 use core::fmt::Display;
+use crate::error::NotFlatError;
 
 pub trait Projection<'a, T: Float, PFrom: 'a, PTo: 'a>
 {
     type IntermediatePoint;
 
-    fn project(&self, point: &PFrom, constructor: &dyn Fn(Self::IntermediatePoint) -> PTo) -> Result<PTo, String>;
-    fn project_line<SourcePoly, ResultPoly>(&'a self, polyline: &'a SourcePoly, constructor: &dyn Fn(Self::IntermediatePoint) -> PTo) -> Result<ResultPoly, String>
+    fn project(&self, point: &PFrom, constructor: &dyn Fn(Self::IntermediatePoint) -> PTo) -> Result<PTo, NotFlatError>;
+    fn project_line<SourcePoly, ResultPoly>(&'a self, polyline: &'a SourcePoly, constructor: &dyn Fn(Self::IntermediatePoint) -> PTo) -> Result<ResultPoly, NotFlatError>
         where SourcePoly: Polyline<'a, T, PFrom>,
               ResultPoly: Polyline<'a, T, PTo> + FromIterator<PTo>
     {
@@ -25,6 +21,8 @@ pub trait Projection<'a, T: Float, PFrom: 'a, PTo: 'a>
 }
 
 /// Web mercator direct projection.
+///
+/// # Example
 ///
 /// ```
 /// use types::projection::{WebMercator, Projection};
@@ -43,7 +41,7 @@ pub struct WebMercator {}
 impl<'a, T: FloatConst + Float + Display, PFrom: 'a + GeoPoint<T>, PTo: 'a + CartesianPoint2<T>> Projection<'a, T, PFrom, PTo> for WebMercator {
     type IntermediatePoint = (T, T);
 
-    fn project(&self, point: &PFrom, constructor: &dyn Fn(Self::IntermediatePoint) -> PTo) -> Result<PTo, String> {
+    fn project(&self, point: &PFrom, constructor: &dyn Fn(Self::IntermediatePoint) -> PTo) -> Result<PTo, NotFlatError> {
         let lon = point.lon().to_radians();
         let lat = point.lat().to_radians();
         let a: T = PFrom::datum().a();
@@ -53,7 +51,7 @@ impl<'a, T: FloatConst + Float + Display, PFrom: 'a + GeoPoint<T>, PTo: 'a + Car
         if y.is_finite() {
             Ok(constructor((x, y)))
         } else {
-            Err(format!("Invalid latitude value: {}", point.lat()))
+            Err(NotFlatError::InvalidLatitude(point.lat_f64()))
         }
     }
 }
