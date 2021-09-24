@@ -8,3 +8,4 @@ pub mod segment;
 pub mod cartesian;
 pub mod geo;
 pub mod datum;
+pub mod projection;

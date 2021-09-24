@@ -4,45 +4,52 @@ use core::slice::Iter;
 #[cfg(feature = "no-std")]
 use alloc::vec::Vec;
 
-use super::Point;
 use crate::segment::Segments;
 use num_traits::Float;
+use crate::cartesian::CartesianPoint2;
 
-pub trait Polyline<'a, T: Float, P: 'a + Point<T>, PIter: Iterator<Item = &'a P>>: Index<usize> {
+pub trait Polyline<'a, T: Float, P: 'a>: Index<usize> {
+    type PIter: Iterator<Item = &'a P>;
+
     fn points_count(&self) -> usize;
-    fn points(&'a self) -> PIter;
+    fn points(&'a self) -> Self::PIter;
 
-    fn segments(&'a self) -> Segments<'a, T, P, PIter> {
+    fn segments(&'a self) -> Segments<'a, T, P, Self::PIter> {
         Segments::new(self.points())
     }
 
-    fn length(&'a self) -> T {
-        let mut length = T::zero();
-        for segment in self.segments() {
-            length = length + segment.length();
-        }
-
-        length
-    }
+    fn length(&'a self) -> T;
 }
 
-impl<'a, T: Float, P: Point<T>> Polyline<'a, T, P, core::slice::Iter<'a, P>> for Vec<P> {
+impl<'a, T: Float, P: 'a + CartesianPoint2<T>> Polyline<'a, T, P> for Vec<P> {
+    type PIter = core::slice::Iter<'a, P>;
+
     fn points_count(&self) -> usize {
         Vec::len(self)
     }
 
-    fn points(&'a self) -> core::slice::Iter<'a, P> {
+    fn points(&'a self) -> Self::PIter {
         self.iter()
+    }
+
+    fn length(&'a self) -> T {
+        self[..].length()
     }
 }
 
-impl<'a, T: Float, P: Point<T>> Polyline<'a, T, P, core::slice::Iter<'a, P>> for [P] {
+impl<'a, T: Float, P: 'a + CartesianPoint2<T>> Polyline<'a, T, P> for [P] {
+    type PIter = core::slice::Iter<'a, P>;
+
     fn points_count(&self) -> usize {
         Self::len(self)
     }
 
     fn points(&'a self) -> Iter<'a, P> {
         self.iter()
+    }
+
+    fn length(&'a self) -> T {
+        self.segments().map(|s| s.length()).fold(T::zero(), |acc, x| acc + x)
     }
 }
 

@@ -17,3 +17,4 @@ no-std = ["libm", "num-traits/libm"]
 
 [dev-dependencies]
 test-case = "1.2"
+assert_float_eq = "1.1.3"

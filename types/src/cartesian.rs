@@ -1,5 +1,4 @@
 use num_traits::Float;
-use crate::common::Point;
 
 pub trait CartesianPoint<T: Float> {
     fn taxicab_distance(&self, other: &Self) -> T;
@@ -8,19 +7,21 @@ pub trait CartesianPoint<T: Float> {
 pub trait CartesianPoint2<T: Float> {
     fn x(&self) -> T;
     fn y(&self) -> T;
+
+    fn distance_square(&self, other: &Self) -> T {
+        let dx = self.x() - other.x();
+        let dy = self.y() - other.y();
+        dx * dx + dy * dy
+    }
+
+    fn distance(&self, other: &Self) -> T {
+        self.distance_square(other).sqrt()
+    }
 }
 
 impl<T: Float, P: CartesianPoint2<T>> CartesianPoint<T> for P {
     fn taxicab_distance(&self, other: &Self) -> T {
         (self.x() - other.x()).abs() + (self.y() - other.y()).abs()
-    }
-}
-
-impl<T: Float, P: CartesianPoint2<T>> Point<T> for P {
-    fn distance_square(&self, other: &Self) -> T {
-        let dx = self.x() - other.x();
-        let dy = self.y() - other.y();
-        dx * dx + dy * dy
     }
 }
 

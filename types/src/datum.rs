@@ -14,6 +14,14 @@ impl Datum {
         }
     }
 
+    pub fn a<T: Float>(&self) -> T {
+        T::from(self.geodesic.a).unwrap()
+    }
+
+    pub fn inv_f<T: Float>(&self) -> T {
+        T::from(self.geodesic.f).unwrap()
+    }
+
     pub fn distance<T: Float, P: GeoPoint<T> + ?Sized>(&self, p1: &P, p2: &P) -> T {
         let result: f64 = self.geodesic.inverse(p1.lat_f64(), p1.lon_f64(), p2.lat_f64(), p2.lon_f64());
         T::from(result).unwrap()

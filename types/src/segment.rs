@@ -1,18 +1,14 @@
 use core::marker::PhantomData;
 use num_traits::Float;
-use crate::common::Point;
+use crate::cartesian::CartesianPoint2;
 
-pub struct Segment<'a, T: Float, P: Point<T>> {
+pub struct Segment<'a, T: Float, P> {
     start: &'a P,
     end: &'a P,
     phantom: PhantomData<T>,
 }
 
-impl<'a, T: Float, P: Point<T>> Segment<'a, T, P> {
-    pub fn length(&self) -> T {
-        self.start.distance(self.end)
-    }
-
+impl<'a, T: Float, P> Segment<'a, T, P> {
     pub fn start(&self) -> &P {
         self.start
     }
@@ -22,13 +18,19 @@ impl<'a, T: Float, P: Point<T>> Segment<'a, T, P> {
     }
 }
 
-pub struct Segments<'a, T: Float, P: Point<T>, PIter: Iterator<Item = &'a P>> {
+impl<'a, T: Float, P: 'a + CartesianPoint2<T>> Segment<'a, T, P> {
+    pub fn length(&self) -> T {
+        self.start.distance(&self.end)
+    }
+}
+
+pub struct Segments<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> {
     prev_point: Option<&'a P>,
     points_iter: PIter,
     phantom: PhantomData<T>,
 }
 
-impl<'a, T: Float, P: Point<T>, PIter: Iterator<Item = &'a P>> Segments<'a, T, P, PIter> {
+impl<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> Segments<'a, T, P, PIter> {
     pub fn new(mut points_iter: PIter) -> Self {
         let first_point = points_iter.next();
         Self {
@@ -39,13 +41,13 @@ impl<'a, T: Float, P: Point<T>, PIter: Iterator<Item = &'a P>> Segments<'a, T, P
     }
 }
 
-impl<'a, T: Float, P: Point<T>, PIter: Iterator<Item = &'a P>> Iterator for Segments<'a, T, P, PIter> {
+impl<'a, T: Float, P: 'a, PIter: Iterator<Item = &'a P>> Iterator for Segments<'a, T, P, PIter> {
     type Item = Segment<'a, T, P>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(val) = self.prev_point {
             if let Some(next_val) = self.points_iter.next() {
-                let segment = Segment { start: val, end: next_val, phantom: PhantomData::default() };
+                let segment = Segment {start: val, end: next_val, phantom: PhantomData::default()};
                 self.prev_point = Some(next_val);
                 Some(segment)
             } else {
