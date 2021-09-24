@@ -50,17 +50,6 @@ impl<T: Float> GeoPoint<T> for Wgs84Point<T> {
     }
 }
 
-// impl<T: Float> Point<T> for Wgs84Point<T> {
-//     fn distance_square(&self, other: &Self) -> T {
-//         let distance = self.distance(other);
-//         distance * distance
-//     }
-//
-//     fn distance(&self, other: &Self) -> T {
-//         GeoPoint::distance(self, other)
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;

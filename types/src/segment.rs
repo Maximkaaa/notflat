@@ -2,6 +2,7 @@ use core::marker::PhantomData;
 use num_traits::Float;
 use crate::cartesian::CartesianPoint2;
 
+#[derive(Debug, Clone)]
 pub struct Segment<'a, T: Float, P> {
     start: &'a P,
     end: &'a P,
